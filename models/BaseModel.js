@@ -9,49 +9,50 @@ class BaseModel{
     }
 
     //根据id获取一条数据
-    getOneById(id,cb = '',field = '*',order = ''){
+    getOneById(id = 0,cb = '',field = '*',order = ''){
     	var sqlInfo = this.getOriginalSql({id:id},field,order,'1');
     	return mysql.query(sqlInfo.sql,sqlInfo.seat,cb);
     }
 
     //根据条件获取一条数据
-    getOneByCondition(map={},cb = '',field = '*',order = ''){
+    getOneByCondition(map = {},cb = '',field = '*',order = ''){
     	var sqlInfo = this.getOriginalSql(map,field,order,'1');
     	return mysql.query(sqlInfo.sql,sqlInfo.seat,cb);
     }
 
     //根据条件和获取数据
-    getAllByCondition(map={},cb = '',field = '', order = '', limit = '',group = ''){
+    getAllByCondition(map = {},cb = '',field = '', order = '', limit = '',group = ''){
         var sqlInfo = this.getOriginalSql(map,field,order,limit,group);
         return mysql.query(sqlInfo.sql,sqlInfo.seat,cb);
     }
 
     //得到数量
-    getCountByCondition(map={},cb = ''){
+    getCountByCondition(map = {},cb = ''){
         var sqlInfo = this.getOriginalSql(map,"count(*) as count",'','1');
         return mysql.query(sqlInfo.sql,sqlInfo.seat,cb);
     }
 
     //插入数据 insertId: 1 返回的插入id
-    insert(data, cb = ''){
+    insert(data = {}, cb = ''){
         var sqlInfo = this.getInsertSql(data);
         return mysql.query(sqlInfo.sql,sqlInfo.seat,cb);
     }
 
     //更新数据   affectedRows: 1 影响的条数
-    update(map,data,cb = ''){
+    update(map = {},data = {},cb = ''){
         var sqlInfo = this.getUpdateSql(data,map);
         return mysql.query(sqlInfo.sql,sqlInfo.seat,cb);
     }
 
     // 删除数据  affectedRows: 1 影响的条数
-    delete(map,cb = ''){
+    delete(map = {},cb = ''){
         var sqlInfo = this.getDeleteSql(map);
+        // console.log(sqlInfo);
         return mysql.query(sqlInfo.sql,sqlInfo.seat,cb);
     }
 
     //得到删除的sql
-    getDeleteSql(map){
+    getDeleteSql(map = {}){
         if (util.isEmptyString(this.tableName)) {
             console.log('ERROR:NO TABLENAME');
             return false;
@@ -66,7 +67,7 @@ class BaseModel{
     }
 
     //得到更新的sql
-    getUpdateSql(data,map){
+    getUpdateSql(data = {},map = {}){
         if (util.isEmptyString(this.tableName)) {
             console.log('ERROR:NO TABLENAME');
             return false;
@@ -91,7 +92,7 @@ class BaseModel{
     }
 
     //得到插入的sql,暂时不支持批量插入
-    getInsertSql(data){
+    getInsertSql(data = {}){
         if (util.isEmptyString(this.tableName)) {
             console.log('ERROR:NO TABLENAME');
             return false;
@@ -128,20 +129,12 @@ class BaseModel{
             console.log('ERROR:NO TABLENAME');
             return false;
         }
-        var where = '1=1 ';
+
         var seat = [];
-        if(!util.isEmptyObject(map)){
-        	for (var key in map) { 
-        		where += ' AND ' + '`' + key + '`' + ' ';
-        		if(util.isArray(map[key])){
-        			where += map[key][0] + ' (' + map[key][1] +')';
-        		}else {
-                    // console.log(String(map[key]));
-                    seat.push(map[key]);
-        			where += ' = ?' ;//+ (util.isString(map[key]) ? String(map[key]) : map[key]);
-        		}
-			}
-        }
+
+        var whereObjectValue = this.getWhereObjectValue('',seat,map);
+        var where = whereObjectValue.sql;
+        seat = whereObjectValue.seat;
 
         if(!util.isEmptyString(order)){
         	order = ' ORDER BY ' + order;
@@ -159,7 +152,7 @@ class BaseModel{
         	field = '*';
         }
 
-        var sql = 'SELECT ' + field + ' FROM ' + this.tableName + ' WHERE ' + where + group  + order + limit;
+        var sql = 'SELECT ' + field + ' FROM ' + this.tableName + ' ' + where + group  + order + limit;
         var SqlInfo = {
             sql:sql,
             seat:seat
@@ -168,12 +161,18 @@ class BaseModel{
         return SqlInfo;
     }
 
-    getWhereObjectValue(sql,seat,map){
+    getWhereObjectValue(sql = '',seat = [],map = {}){
+
         if(!util.isEmptyObject(map)){
             var where = [];
             for(var mk in map){
-                where.push('`' + mk + '` = ?'); 
-                seat.push(map[mk]);
+                if(util.isArray(map[mk])){
+                    where.push('`' + mk + '` '+ map[mk][0] + ' (?)');
+                    seat.push(this.handleInValue(map[mk][1]));
+                }else{
+                    where.push('`' + mk + '` = ?');
+                    seat.push(map[mk]);
+                }
             }
             if(!util.isEmptyArray(where)){
                 sql += ' WHERE  ' + where.join(' AND '); // 拼接where条件
@@ -185,8 +184,13 @@ class BaseModel{
         }
     }
 
-
-
+    handleInValue(value = ''){
+        value = value.trim();
+        if(!util.isEmptyString(value)){
+            value = value.split(',');
+        }
+        return value;
+    }
 }
 
 module.exports = BaseModel;
