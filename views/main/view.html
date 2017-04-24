@@ -10,7 +10,11 @@
             评论：<span class="colInfo">{{content.comments.length}}</span>
         </p>
         <dfn>
-            {% autoescape %}{{content.content}}{% endautoescape %}
+            {% if userInfo.id %}
+                {% autoescape %}{{content.content}}{% endautoescape %}
+            {%else%}
+                <p class="bgDanger" style="line-height: 30px;">你还没有登录，请先登录！</p>
+            {%endif%}
         </dfn>
     </div>
 
