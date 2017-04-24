@@ -1,6 +1,8 @@
 {% extends 'layout.html' %}
-
 {% block main %}
+<script type="text/javascript" charset="utf-8" src="/public/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" charset="utf-8" src="/public/ueditor/ueditor.all.min.js"> </script>
+<script type="text/javascript" charset="utf-8" src="/public/ueditor/lang/zh-cn/zh-cn.js"></script>
 
 <ol class="breadcrumb">
     <li><a href="/admin">管理首页</a></li>
@@ -32,10 +34,17 @@
 
     <div class="form-group">
         <label for="content">内容：</label>
-        <textarea name="content" id="content" class="form-control" rows="10" placeholder="请输入内容"></textarea>
+        <textarea name="content" id="content"  placeholder="请输入内容"></textarea>
     </div>
 
     <button type="submit" class="btn btn-default">提交</button>
 </form>
 
+<script type="text/javascript">
+
+    //实例化编辑器
+    //建议使用工厂方法getEditor创建和引用编辑器实例，如果在某个闭包下引用该编辑器，直接调用UE.getEditor('editor')就能拿到相关的实例
+    var ue = UE.getEditor('content');
+
+</script>
 {% endblock %}

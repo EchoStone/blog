@@ -7,6 +7,8 @@ var Post = require('../models/Post.js');
 var util = require('../util/util');
 var data;
 
+
+
 /*
 * 处理通用的数据
 * */
@@ -31,8 +33,8 @@ router.use(function (req, res, next) {
 * 首页
 * */
 router.get('/', function(req, res, next) {
-    
-    
+
+
 
     data.category = req.query.category || '';
     data.count = 0;

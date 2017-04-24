@@ -10,7 +10,7 @@
             评论：<span class="colInfo">{{content.comments.length}}</span>
         </p>
         <dfn>
-            {{content.content}}
+            {% autoescape %}{{content.content}}{% endautoescape %}
         </dfn>
     </div>
 
