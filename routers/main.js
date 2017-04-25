@@ -50,7 +50,7 @@ router.get('/', function(req, res, next) {
         data.pages = Math.ceil(data.count / data.limit);
         data.page = Math.min( data.page, data.pages );
         data.page = Math.max( data.page, 1 );
-        postModel.getAllByCondition(where,'','','',(data.page-1)*data.limit +',' + data.limit).then(rs=>{
+        postModel.getAllByCondition(where,'','','id desc',(data.page-1)*data.limit +',' + data.limit).then(rs=>{
             data.contents = rs;
             res.render('main/index', data);
         });
